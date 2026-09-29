@@ -1,0 +1,4 @@
+node_modules/
+inovapan.db
+*.log
+.env
