@@ -1,394 +1,238 @@
-# InovaPan — Sistema de Gestão de Pedidos para Panificadora
+# InovaPan
 
+Sistema de Gestão de Pedidos para Panificadora desenvolvido no curso de **Tecnologia em Sistemas para Internet da UESPI/UAPI**, Polo Jerumenha, em 2026.
 
-O **InovaPan** é um Sistema de Gestão de Pedidos desenvolvido para apoiar as principais operações de uma panificadora, permitindo o gerenciamento de **clientes, produtos, pedidos, vendas e indicadores gerenciais**.
+Este documento apresenta a versão local da **Entrega 05**, desenvolvida a partir da integração realizada na **Entrega 04**, com finalização das funcionalidades, testes e configuração da publicação da UI na Vercel e da API no Render.
 
-Esta versão corresponde à **Entrega 04 do projeto**, cujo objetivo principal foi realizar a integração entre a interface do sistema (**Front-end**), a API (**Back-end**) e o banco de dados **SQLite**.
+**Situação em 28 de outubro de 2026:** implementação validada localmente. O envio do código correspondente da Entrega 05 ao GitHub, a publicação na Vercel e no Render, a validação pública e a conferência dos cartões do Trello permanecem pendentes. O repositório remoto consultado nessa data ainda corresponde à base da Entrega 04.
 
-O projeto foi desenvolvido no curso de **Tecnologia em Sistemas para Internet — UESPI / UAPI**.
+## Acessos do projeto
 
----
+| Recurso | Endereço ou situação |
+| --- | --- |
+| Repositório | [viviferr4z/INOVAPAN](https://github.com/viviferr4z/INOVAPAN) |
+| Código da Entrega 05 no GitHub | Atualização pendente |
+| Planejamento | [Quadro InovaPan no Trello](https://trello.com/b/zlxtIrdV/inovapan) |
+| UI na Vercel | A publicar |
+| API no Render | A publicar |
 
-## Objetivo
+## Funcionalidades
 
-Neste projeto foram consolidadas as funcionalidades necessárias para permitir a comunicação completa entre a interface do usuário e o servidor.
+| Módulo | Operações disponíveis |
+| --- | --- |
+| Acesso | Login validado pela API, sessão com duração de 8 horas e saída pelo navegador. |
+| Clientes | Cadastro, consulta, pesquisa, edição e exclusão; clientes com pedidos vinculados são preservados. |
+| Produtos | Cadastro, consulta, pesquisa e edição; produtos vinculados a pedidos são inativados ao solicitar exclusão. |
+| Pedidos | Criação, consulta detalhada dos itens, edição de cliente/itens/observação, alteração de status e exclusão. |
+| Painel | Total de clientes, produtos ativos, pedidos e vendas do dia e faturamento de pedidos concluídos. |
+| Relatórios | Consulta de vendas por período, quantidade de pedidos e valor total; pedidos cancelados não entram nas vendas. |
 
-As operações realizadas nas páginas do sistema são enviadas para uma API desenvolvida com **Node.js e Express**, que realiza o processamento das requisições e a comunicação com o banco de dados **SQLite**.
+O total do pedido é calculado pela API com os preços do cadastro. Na edição dos itens de um pedido aberto ou em preparo, o total é recalculado com os preços atuais. Pedidos concluídos ou cancelados preservam seus itens. A consulta de datas do painel e dos relatórios considera o horário de Brasília.
 
-Com essa integração, informações cadastradas na interface passam a ser persistidas no banco de dados e utilizadas pelos demais módulos do sistema.
+O acesso utiliza um administrador configurado no ambiente. Perfis distintos e recuperação de senha não fazem parte desta versão. Alterar `AUTH_SECRET` invalida as sessões existentes.
 
----
+## Tecnologias
 
-## Tecnologias utilizadas
+| Camada | Tecnologias |
+| --- | --- |
+| UI | HTML5, CSS3, JavaScript, Fetch API e Bootstrap 5.3.3 incluído localmente. |
+| API | Node.js, Express 4.22.3 e CORS 2.8.5. |
+| Persistência | SQLite, com driver sqlite3 6.0.1. |
+| Versionamento e planejamento | Git, GitHub e Trello. |
+| Publicação preparada | Vercel para a UI e Render para a API. |
 
-### Front-end
+O projeto requer **Node.js 22 ou 24** e npm. Os testes foram executados com Node.js 24. A configuração de implantação seleciona Node.js 22.
 
-- HTML5
-- CSS3
-- Bootstrap 5
-- JavaScript
-- Fetch API
+## Organização dos arquivos
 
-### Back-end
+| Caminho | Finalidade |
+| --- | --- |
+| Páginas HTML da raiz | Início, login, painel, clientes, produtos, pedidos e relatórios. |
+| `css/` e `js/` | Estilos e comportamento da interface; requisições centralizadas em `js/api.js`. |
+| `vendor/` | Arquivos do Bootstrap e sua licença. |
+| `backend/` | Servidor, autenticação, banco de dados, dependências e testes da API. |
+| `scripts/` | Geração e testes da UI publicada em `dist`. |
+| `vercel.json` e `render.yaml` | Configuração de implantação nas plataformas exigidas. |
+| `PUBLICACAO.md` | Procedimento de publicação e validação pública. |
 
-- Node.js
-- Express
-- CORS
-- SQLite
+A UI solicita as operações à API por HTTP. A API valida os dados, consulta ou grava no SQLite e retorna JSON para atualizar as telas. As gravações de pedidos usam transações isoladas e uma fila de escrita para tratar requisições simultâneas.
 
----
+## Executar localmente
 
-## Funcionalidades implementadas
+São utilizados **dois terminais**: um para a API e outro para a UI. Os dois devem permanecer em execução durante o uso.
 
-### Clientes
+### 1 Configurar uma instalação nova
 
-O módulo de clientes permite:
+Na raiz do projeto, abra um terminal. No Windows:
 
-- cadastrar clientes;
-- consultar clientes cadastrados;
-- pesquisar clientes;
-- editar informações;
-- excluir registros.
-
----
-
-### Produtos
-
-O módulo de produtos permite:
-
-- cadastrar produtos;
-- consultar produtos;
-- editar informações;
-- pesquisar produtos;
-- controlar produtos ativos;
-- inativar ou excluir produtos.
-
----
-
-### Pedidos
-
-O módulo de pedidos permite:
-
-- criar novos pedidos;
-- selecionar o cliente;
-- adicionar produtos;
-- definir quantidades;
-- calcular os valores do pedido;
-- consultar pedidos registrados;
-- atualizar o status;
-- excluir pedidos.
-
-Os pedidos são registrados juntamente com seus respectivos itens e quantidades.
-
----
-
-### Painel gerencial
-
-O painel apresenta informações consolidadas obtidas através da API, permitindo acompanhar indicadores do sistema, como:
-
-- quantidade de clientes;
-- produtos ativos;
-- pedidos realizados;
-- vendas do dia;
-- faturamento referente aos pedidos concluídos.
-
----
-
-### Relatório de vendas
-
-O sistema possui uma área de relatórios que permite consultar as vendas realizadas em determinado período.
-
-O relatório apresenta informações como:
-
-- pedidos encontrados;
-- cliente;
-- data;
-- status;
-- valor da venda;
-- quantidade de vendas;
-- valor total vendido no período.
-
----
-
-## Integração entre Front-end e Back-end
-
-A comunicação entre as páginas do sistema e a API foi centralizada no arquivo:
-
-```text
-js/api.js
-```
-
-Esse arquivo é responsável por intermediar as requisições realizadas pelos módulos de clientes, produtos, pedidos, painel e relatórios.
-
-O fluxo básico de funcionamento do sistema é:
-
-```text
-Usuário
-   ↓
-Interface HTML
-   ↓
-JavaScript / Fetch API
-   ↓
-API Node.js + Express
-   ↓
-SQLite
-   ↓
-Resposta JSON
-   ↓
-Atualização da interface
-```
-
-Quando o usuário realiza uma ação na interface, o JavaScript prepara os dados e envia uma requisição HTTP para a API.
-
-O Express recebe a solicitação, realiza as validações necessárias e consulta ou grava as informações no banco SQLite.
-
-Em seguida, a API retorna uma resposta em formato JSON, utilizada pelo Front-end para atualizar as informações apresentadas ao usuário.
-
----
-
-# Como executar o projeto
-
-Para executar o InovaPan localmente são necessários **dois terminais**:
-
-- um para executar a API;
-- outro para executar o Front-end.
-
-## 1. Pré-requisitos
-
-Antes de iniciar, é necessário ter instalado:
-
-- Node.js;
-- npm;
-- navegador web;
-- terminal ou PowerShell.
-
-Para verificar se o Node.js está instalado:
-
-```bash
-node --version
-```
-
-Para verificar o npm:
-
-```bash
-npm --version
-```
-
----
-
-## 2. Executar o Back-end
-
-Abra um terminal na pasta do projeto e acesse:
-
-```bash
+```bat
 cd backend
+copy .env.example .env
 ```
 
-Instale as dependências:
+Gere uma chave de assinatura:
 
-```bash
-npm install
+```bat
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
-Depois execute:
+Abra o arquivo de configuração:
 
-```bash
+```bat
+notepad .env
+```
+
+Preencha as variáveis e salve o arquivo:
+
+| Variável | Configuração local |
+| --- | --- |
+| `PORT` | `3000` |
+| `ADMIN_USER` | Nome do administrador; o modelo utiliza `administrador`. |
+| `ADMIN_PASSWORD` | Senha exclusiva com pelo menos 12 caracteres. |
+| `AUTH_SECRET` | Chave aleatória gerada no terminal, com pelo menos 32 caracteres. |
+| `CORS_ORIGINS` | `http://localhost:5500,http://127.0.0.1:5500` |
+| `DB_PATH` | Opcional localmente; sem essa variável, o banco é criado em `backend/data/inovapan.db`. |
+
+Se a aplicação já estiver configurada, preserve seu `.env` e o banco existentes. O modelo `.env.example` contém campos vazios para senha e chave e pode ser versionado; o `.env` preenchido fica somente no ambiente de execução.
+
+### 2 Iniciar a API
+
+No terminal da pasta `backend`, execute:
+
+```bat
+npm ci
 npm start
 ```
 
-A API ficará disponível em:
+A API informa `InovaPan API na porta 3000`. A verificação de saúde fica em [http://localhost:3000/api/health](http://localhost:3000/api/health).
 
-```text
-http://localhost:3000
+### 3 Iniciar a UI
+
+Abra outro terminal **na raiz do projeto**, onde está o `package.json` da UI:
+
+```bat
+npm run build
+npx http-server dist -p 5500
 ```
 
- **Mantenha esse terminal aberto enquanto estiver utilizando o sistema.**
+Caso o npm solicite instalar `http-server`, confirme para iniciar o servidor estático. Abra [http://localhost:5500](http://localhost:5500) e entre com o usuário e a senha definidos no ambiente da API.
 
----
+O build local usa `http://localhost:3000/api` quando não recebe `INOVAPAN_API_URL`. No build da Vercel, essa variável é obrigatória e deve conter a URL HTTPS real do Render terminada em `/api`.
 
-## 3. Executar o Front-end
+## Banco e atualização de uma instalação existente
 
-Abra **outro terminal**.
+O banco fica fora de `node_modules` e do controle de versão. A pasta `backend/data` deve ser preservada na cópia utilizada para registrar clientes, produtos e pedidos.
 
-O segundo terminal deve estar na **raiz do projeto `INOVAPAN`**, e não dentro da pasta `backend`.
+Na Entrega 04, o caminho padrão era `backend/inovapan.db`. Para continuar utilizando um banco desse formato, pare a API, faça um backup e defina `DB_PATH` para o arquivo existente ou copie o banco para o novo caminho antes de iniciar. Faça a cópia somente com a API encerrada, para que os registros pendentes tenham sido gravados.
 
-Execute:
+Para atualizar as bibliotecas de uma cópia que já funciona, mantenha `.env` e o banco, substitua os arquivos de dependências e encerre a API antes de executar `npm ci`. Se o Windows informar `EPERM` no arquivo `node_sqlite3.node`, confira se uma instância anterior da API continua usando o arquivo.
 
-```bash
-npx http-server . -p 5500
+Os registros cadastrados pertencem à instalação local. Ao atualizar os arquivos do projeto, preserve o banco e o `.env` utilizados nessa instalação. Os arquivos de documentação podem ser substituídos independentemente da execução do sistema.
+
+## Testes e resultados
+
+Na raiz, execute os testes de preparação da UI:
+
+```bat
+npm test
 ```
 
-> Durante a execução poderá ser solicitada a instalação do pacote `http-server`. Caso apareça a confirmação, autorize a execução.
+Na raiz, execute os testes da API:
 
-O Front-end ficará disponível em:
-
-```text
-http://localhost:5500
+```bat
+npm --prefix backend test
 ```
 
-Abra esse endereço no navegador.
+Na pasta `backend`, a auditoria das dependências pode ser consultada com:
 
----
-
-## Importante
-
-A aplicação utiliza duas portas diferentes:
-
-```text
-Front-end → http://localhost:5500
-Back-end  → http://localhost:3000
+```bat
+npm audit
 ```
 
-Os **dois servidores precisam permanecer em execução simultaneamente** para que a integração UI/API funcione corretamente.
+Resultados registrados em **28 de outubro de 2026**:
 
----
+- **14 testes da API aprovados**, incluindo autenticação, cadastros, pedidos, rollback, concorrência, relatórios e persistência após reinício.
+- **2 testes do build da UI aprovados**, verificando a configuração da API e a exclusão de arquivos privados da pasta pública.
+- **12 verificações pelo navegador aprovadas** no ambiente local de preparação.
+- **Zero vulnerabilidades conhecidas reportadas pelo npm audit** após a atualização das dependências, na consulta dessa data.
+- Execução confirmada pela equipe em **Windows com Node.js 24.18.0**: instalação concluída, 14 testes da API aprovados e servidor iniciado na porta 3000.
 
-# Principais endpoints da API
+Os testes automatizados usam banco temporário, separado dos registros cadastrados durante o uso. A API foi verificada quanto a login e token inválido, CORS, validação dos cadastros e preços, cálculo e edição dos pedidos, rollback sem gravação parcial, oito pedidos simultâneos válidos e um inválido, preservação de vínculos, status, calendário, horário de Brasília, exclusão em cascata e leitura dos registros após reinício.
 
-### Clientes
+O build foi verificado quanto à URL pública da API e à geração da pasta `dist` com arquivos destinados ao navegador. Banco, credenciais e código do servidor ficaram fora dessa pasta.
 
-```http
-GET    /api/clientes
-POST   /api/clientes
-PUT    /api/clientes/:id
-DELETE /api/clientes/:id
-```
+| Cenário | Composição | Resultado registrado |
+| --- | --- | --- |
+| Pedido automatizado | 1 bolo de R$25,00 e 10 pães de R$1,00. | R$35,00 calculados pela API. |
+| Edição automatizada | 1 bolo de R$25,00 e 15 pães de R$1,00. | R$40,00, com itens, relatório e faturamento conferidos após a conclusão. |
+| Pedido manual no Windows | 4 bolos de R$9,92. | R$39,68, status CONCLUIDO e uma venda no relatório. |
 
-### Produtos
+A conferência pelo navegador incluiu login, sessão protegida, cadastros, edição, detalhes dos pedidos, relatório, painel, saída da sessão, apresentação em largura de 390 pixels e exibição de texto com marcação HTML sem execução. Não foram observadas exceções JavaScript nesse fluxo.
 
-```http
-GET    /api/produtos
-POST   /api/produtos
-PUT    /api/produtos/:id
-DELETE /api/produtos/:id
-```
+Os resultados comprovam funcionamento local. Permanecem pendentes os testes nos endereços públicos da Vercel e do Render, incluindo a permanência dos registros após reinício ou nova implantação da API.
 
-### Pedidos
+## Principais endpoints
 
-```http
-GET    /api/pedidos
-POST   /api/pedidos
-GET    /api/pedidos/:id
-PUT    /api/pedidos/:id
-DELETE /api/pedidos/:id
-```
+`GET /api/health` e `POST /api/auth/login` são públicos. As demais operações abaixo exigem o token de acesso no cabeçalho `Authorization: Bearer TOKEN`.
 
-### Dashboard
+| Método | Caminho | Operação |
+| --- | --- | --- |
+| POST | `/api/auth/login` | Entrar com `usuario` e `senha`. |
+| GET | `/api/clientes?q=texto` | Listar e pesquisar clientes. |
+| POST | `/api/clientes` | Cadastrar cliente. |
+| PUT / DELETE | `/api/clientes/:id` | Editar ou excluir cliente. |
+| GET | `/api/produtos?q=texto` | Listar e pesquisar produtos. |
+| POST | `/api/produtos` | Cadastrar produto. |
+| PUT / DELETE | `/api/produtos/:id` | Editar, excluir ou inativar produto. |
+| GET | `/api/pedidos` e `/api/pedidos/:id` | Consultar pedidos e seus itens. |
+| POST | `/api/pedidos` | Registrar pedido. |
+| PUT | `/api/pedidos/:id` | Editar pedido ou atualizar status. |
+| DELETE | `/api/pedidos/:id` | Excluir pedido. |
+| GET | `/api/dashboard` | Consultar indicadores do painel. |
+| GET | `/api/relatorios/vendas?inicio=AAAA-MM-DD&fim=AAAA-MM-DD` | Consultar vendas por período. |
 
-```http
-GET /api/dashboard
-```
+## Organização das tarefas
 
-### Relatório de vendas
+A Entrega 04 documentou oito tarefas da API e oito da UI para integrar clientes, produtos, pedidos, painel e relatórios. A Entrega 05 mantém essa base e acrescenta acesso autenticado, edição dos itens, validações e configuração de implantação. As atividades implementadas localmente estão resumidas abaixo.
 
-```http
-GET /api/relatorios/vendas?inicio=AAAA-MM-DD&fim=AAAA-MM-DD
-```
+| Área | Implementação na API | Implementação na UI |
+| --- | --- | --- |
+| Acesso e comunicação | Login, token, proteção de rotas e tratamento de erros. | Login, sessão e comunicação centralizada com a API. |
+| Clientes | Cadastro, consulta, pesquisa, edição e exclusão com proteção dos vínculos. | Formulários, pesquisa e listagem integrados. |
+| Produtos | Cadastro, consulta, pesquisa, edição e exclusão ou inativação. | Formulários, listagem e controle de disponibilidade. |
+| Novo pedido | Registro dos itens e cálculo do total no servidor. | Seleção de cliente, produtos e quantidades. |
+| Gerenciamento de pedidos | Consulta dos detalhes, edição, status e exclusão. | Listagem, detalhes dos itens e ações de gerenciamento. |
+| Painel | Indicadores de clientes, produtos, pedidos e faturamento. | Apresentação dos indicadores obtidos da API. |
+| Relatórios | Consulta por período e resumo das vendas. | Filtros, listagem e total consolidado. |
+| Validação e consistência | Regras de entrada, transações e preservação dos dados. | Mensagens das operações, validações e tratamento de textos recebidos. |
 
-Exemplo:
+As tarefas e evidências devem ser acompanhadas no [Trello](https://trello.com/b/zlxtIrdV/inovapan). A equipe ainda deve conferir a correspondência com os cartões reais e registrar as atividades de publicação. Esta revisão não confirma a situação atual dos cartões.
 
-```text
-/api/relatorios/vendas?inicio=2026-09-01&fim=2026-09-30
-```
+| Atividade de encerramento | Situação em 28/10/2026 |
+| --- | --- |
+| Implementação e validação local da UI e da API | Confirmadas. |
+| Envio do código da Entrega 05 ao GitHub | Pendente. |
+| Publicação da UI na Vercel e da API no Render | Pendente. |
+| Testes da integração e da persistência nos serviços publicados | Pendentes. |
+| Conferência dos cartões do Trello e registro das evidências públicas | Pendentes. |
 
----
+A Entrega 05 estará concluída quando os serviços exigidos estiverem acessíveis e integrados, a persistência estiver confirmada e os documentos e cartões apresentarem os links e as evidências correspondentes.
 
-# Validação funcional
+## Publicação da Entrega 05
 
-Após a integração entre Front-end, API e banco de dados, foram realizados testes funcionais em ambiente local.
+Siga [PUBLICACAO.md](PUBLICACAO.md). A configuração prevista é:
 
-Durante os testes foram validados:
+| Projeto | Plataforma | Configuração |
+| --- | --- | --- |
+| UI | Vercel | Raiz do repositório; `npm run build`; saída `dist`; `INOVAPAN_API_URL` com a URL pública real da API. |
+| API | Render | Raiz `backend`; `npm ci --omit=dev`; `npm start`; saúde em `/api/health`. |
+| Banco | Disco do Render | `DB_PATH=/var/data/inovapan.db` e disco montado em `/var/data`. |
 
-- cadastro e consulta de clientes;
-- cadastro e consulta de produtos;
-- criação de pedidos;
-- atualização do status dos pedidos;
-- geração do relatório de vendas;
-- atualização dos indicadores do painel.
+Para preservar SQLite entre reinícios e novas implantações no Render, o arquivo `render.yaml` prevê serviço e disco pagos. A modalidade gratuita sem disco serve a uma demonstração temporária e não preserva esses arquivos após reinícios ou novas implantações. Nenhum serviço foi contratado nesta preparação.
 
-Como cenário de validação, foi cadastrado um cliente e dois produtos e posteriormente criado um pedido no valor de **R$ 35,00**.
+Os endereços públicos da UI e da API devem ser inseridos neste README e no relatório depois da publicação. O funcionamento do login, dos cadastros, dos pedidos, dos relatórios e da persistência deve ser confirmado nesses endereços.
 
-Após a conclusão do pedido, as informações foram corretamente refletidas no relatório de vendas e nos indicadores do painel, demonstrando a comunicação entre a interface, a API e a persistência dos dados.
-
----
-
-# Tarefas API — Sprint de Integração
-
-1. Validação das requisições e tratamento de erros.
-2. CRUD completo de clientes.
-3. CRUD completo de produtos.
-4. Registro de pedidos e respectivos itens.
-5. Consulta detalhada dos pedidos.
-6. Atualização de status e exclusão de pedidos.
-7. Disponibilização de indicadores para o painel.
-8. Relatório de vendas por período.
-
----
-
-# Tarefas UI — Sprint de Integração
-
-1. Centralização da comunicação com a API em `js/api.js`.
-2. Integração do módulo de clientes.
-3. Integração do módulo de produtos.
-4. Implementação da criação de novos pedidos.
-5. Consulta e gerenciamento dos pedidos.
-6. Atualização dinâmica dos indicadores do painel.
-7. Implementação do relatório de vendas.
-8. Inclusão de mensagens de retorno, validações e feedback das operações.
-
----
-
-# Banco de dados
-
-O projeto utiliza **SQLite** para persistência das informações.
-
-O banco utilizado durante o desenvolvimento é um arquivo local e não precisa ser versionado juntamente com o código-fonte.
-
-Por esse motivo, o arquivo:
-
-```text
-inovapan.db
-```
-
-está incluído no `.gitignore`.
-
-Também não é enviada ao GitHub a pasta:
-
-```text
-node_modules/
-```
-
-As dependências podem ser instaladas novamente através do comando:
-
-```bash
-npm install
-```
-
----
-
-
-Projeto desenvolvido para o curso de:
-
-**Tecnologia em Sistemas para Internet**
-
-**Universidade Estadual do Piauí — UESPI**  
-**Universidade Aberta do Piauí — UAPI**
-
-Projeto:
-
-**Sistema de Gestão de Pedidos para Panificadora — InovaPan**
-
-Polo:
-
-**Jerumenha — PI**
-
-Ano:
-
-**2026**
-
----
-
-# Equipe
+## Equipe
 
 - Hellem da Silva Rodrigues
 - Maria Eli Gomes da Silva
@@ -396,23 +240,20 @@ Ano:
 - Shili Samara Alencar Sandes
 - Vivianne Martins Ferraz
 
----
+| Identificação acadêmica | Informação |
+| --- | --- |
+| Instituição | Universidade Estadual do Piauí, UESPI/UAPI |
+| Curso | Tecnologia em Sistemas para Internet |
+| Polo | Jerumenha, PI |
+| Ano | 2026 |
 
-# Gerenciamento do projeto
+## Referências
 
-As atividades e tarefas das sprints foram organizadas através do **Trello**.
-
-Trello:
-
-https://trello.com/b/zlxtIrdV/inovapan
-
----
-
-# Referências
-
-- Bootstrap — https://getbootstrap.com
-- Express — https://expressjs.com
-- MDN Web Docs — https://developer.mozilla.org
-- Node.js — https://nodejs.org
-- SQLite — https://www.sqlite.org/docs.html
+- [Bootstrap](https://getbootstrap.com)
+- [Express](https://expressjs.com)
+- [MDN Web Docs](https://developer.mozilla.org)
+- [Node.js](https://nodejs.org)
+- [SQLite](https://www.sqlite.org/docs.html)
+- [Vercel](https://vercel.com/docs)
+- [Render](https://render.com/docs)
 - SOMMERVILLE, Ian. *Engenharia de Software*. 10. ed. São Paulo: Pearson, 2018.

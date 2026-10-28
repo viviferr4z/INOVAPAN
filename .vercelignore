@@ -1,0 +1,6 @@
+.git
+backend
+output
+*.zip
+*.pdf
+*.docx

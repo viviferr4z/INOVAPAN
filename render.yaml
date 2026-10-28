@@ -1,0 +1,29 @@
+# SQLite com persistência: serviço e disco pagos. Confira os custos antes de aplicar.
+services:
+  - type: web
+    name: inovapan-api
+    runtime: node
+    plan: starter
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: inovapan-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22
+      - key: DB_PATH
+        value: /var/data/inovapan.db
+      - key: ADMIN_USER
+        value: administrador
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false

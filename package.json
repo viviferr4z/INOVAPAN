@@ -1,0 +1,8 @@
+{
+  "name": "inovapan-ui",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Interface do InovaPan - Entrega 05",
+  "engines": { "node": ">=22 <25" },
+  "scripts": { "build": "node scripts/build-ui.mjs", "test": "node --test scripts/*.test.mjs" }
+}

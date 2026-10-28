@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.db
+*.db-*
+*.sqlite*
+backend/data/
+dist/
+.vercel/
+coverage/
+*.log
+.DS_Store
