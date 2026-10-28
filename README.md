@@ -2,19 +2,21 @@
 
 Sistema de Gestão de Pedidos para Panificadora desenvolvido no curso de **Tecnologia em Sistemas para Internet da UESPI/UAPI**, Polo Jerumenha, em 2026.
 
-Este documento apresenta a versão local da **Entrega 05**, desenvolvida a partir da integração realizada na **Entrega 04**, com finalização das funcionalidades, testes e configuração da publicação da UI na Vercel e da API no Render.
+Este documento apresenta a **Entrega 05**, desenvolvida a partir da integração realizada na **Entrega 04**, com finalização das funcionalidades, testes e publicação da UI na Vercel e da API no Render.
 
-**Situação em 28 de outubro de 2026:** implementação validada localmente. O envio do código correspondente da Entrega 05 ao GitHub, a publicação na Vercel e no Render, a validação pública e a conferência dos cartões do Trello permanecem pendentes. O repositório remoto consultado nessa data ainda corresponde à base da Entrega 04.
+**Situação em 28 de outubro de 2026:** código da Entrega 05 enviado ao GitHub, UI publicada na Vercel e API publicada no Render. A página de login, a configuração pública da API, a rota de saúde, a autorização da origem da Vercel e a proteção de uma rota sem autenticação foram verificadas nos endereços publicados. A equipe confirmou o login e a abertura do painel pelo site. A configuração gratuita do Render utiliza banco temporário; a conferência final dos fluxos públicos e dos cartões reais do Trello deve ser registrada pela equipe.
 
 ## Acessos do projeto
 
 | Recurso | Endereço ou situação |
 | --- | --- |
 | Repositório | [viviferr4z/INOVAPAN](https://github.com/viviferr4z/INOVAPAN) |
-| Código da Entrega 05 no GitHub | Atualização pendente |
+| Código de referência da publicação | [Commit afb7d47](https://github.com/viviferr4z/INOVAPAN/commit/afb7d47f2eddb21b2ff300fb394c2477d2b1c358) |
 | Planejamento | [Quadro InovaPan no Trello](https://trello.com/b/zlxtIrdV/inovapan) |
-| UI na Vercel | A publicar |
-| API no Render | A publicar |
+| UI na Vercel | [https://inovapan.vercel.app](https://inovapan.vercel.app) |
+| Login público | [https://inovapan.vercel.app/login.html](https://inovapan.vercel.app/login.html) |
+| API no Render | [https://inovapan.onrender.com/api](https://inovapan.onrender.com/api) |
+| Saúde da API | [https://inovapan.onrender.com/api/health](https://inovapan.onrender.com/api/health) |
 
 ## Funcionalidades
 
@@ -39,9 +41,9 @@ O acesso utiliza um administrador configurado no ambiente. Perfis distintos e re
 | API | Node.js, Express 4.22.3 e CORS 2.8.5. |
 | Persistência | SQLite, com driver sqlite3 6.0.1. |
 | Versionamento e planejamento | Git, GitHub e Trello. |
-| Publicação preparada | Vercel para a UI e Render para a API. |
+| Publicação | Vercel para a UI e Render Free para a API de demonstração. |
 
-O projeto requer **Node.js 22 ou 24** e npm. Os testes foram executados com Node.js 24. A configuração de implantação seleciona Node.js 22.
+O projeto requer **Node.js 22 ou 24** e npm. Os testes locais foram executados com Node.js 24. A API publicada utiliza Node.js 22.
 
 ## Organização dos arquivos
 
@@ -52,7 +54,8 @@ O projeto requer **Node.js 22 ou 24** e npm. Os testes foram executados com Node
 | `vendor/` | Arquivos do Bootstrap e sua licença. |
 | `backend/` | Servidor, autenticação, banco de dados, dependências e testes da API. |
 | `scripts/` | Geração e testes da UI publicada em `dist`. |
-| `vercel.json` e `render.yaml` | Configuração de implantação nas plataformas exigidas. |
+| `vercel.json` | Comandos e arquivos públicos da UI na Vercel. |
+| `render.yaml` | Alternativa de implantação com serviço e disco pagos; a demonstração gratuita foi configurada manualmente. |
 | `PUBLICACAO.md` | Procedimento de publicação e validação pública. |
 
 A UI solicita as operações à API por HTTP. A API valida os dados, consulta ou grava no SQLite e retorna JSON para atualizar as telas. As gravações de pedidos usam transações isoladas e uma fila de escrita para tratar requisições simultâneas.
@@ -67,7 +70,6 @@ Na raiz do projeto, abra um terminal. No Windows:
 
 ```bat
 cd backend
-copy .env.example .env
 ```
 
 Gere uma chave de assinatura:
@@ -82,18 +84,28 @@ Abra o arquivo de configuração:
 notepad .env
 ```
 
+Se o arquivo ainda não existir, confirme sua criação. Cole esta base e substitua os campos vazios pela senha escolhida e pela chave gerada:
+
+```dotenv
+PORT=3000
+ADMIN_USER=administrador
+ADMIN_PASSWORD=
+AUTH_SECRET=
+CORS_ORIGINS=http://localhost:5500,http://127.0.0.1:5500
+```
+
 Preencha as variáveis e salve o arquivo:
 
 | Variável | Configuração local |
 | --- | --- |
 | `PORT` | `3000` |
-| `ADMIN_USER` | Nome do administrador; o modelo utiliza `administrador`. |
+| `ADMIN_USER` | Nome do administrador; a configuração acima utiliza `administrador`. |
 | `ADMIN_PASSWORD` | Senha exclusiva com pelo menos 12 caracteres. |
 | `AUTH_SECRET` | Chave aleatória gerada no terminal, com pelo menos 32 caracteres. |
 | `CORS_ORIGINS` | `http://localhost:5500,http://127.0.0.1:5500` |
 | `DB_PATH` | Opcional localmente; sem essa variável, o banco é criado em `backend/data/inovapan.db`. |
 
-Se a aplicação já estiver configurada, preserve seu `.env` e o banco existentes. O modelo `.env.example` contém campos vazios para senha e chave e pode ser versionado; o `.env` preenchido fica somente no ambiente de execução.
+Se a aplicação já estiver configurada, preserve seu `.env` e o banco existentes. Caso sua cópia inclua `.env.example`, ele também pode ser utilizado como modelo; o `.env` preenchido fica somente no ambiente de execução.
 
 ### 2 Iniciar a API
 
@@ -169,7 +181,20 @@ O build foi verificado quanto à URL pública da API e à geração da pasta `di
 
 A conferência pelo navegador incluiu login, sessão protegida, cadastros, edição, detalhes dos pedidos, relatório, painel, saída da sessão, apresentação em largura de 390 pixels e exibição de texto com marcação HTML sem execução. Não foram observadas exceções JavaScript nesse fluxo.
 
-Os resultados comprovam funcionamento local. Permanecem pendentes os testes nos endereços públicos da Vercel e do Render, incluindo a permanência dos registros após reinício ou nova implantação da API.
+Os resultados acima foram obtidos no ambiente local. A publicação recebeu também as verificações públicas abaixo, sem utilizar senha ou token de acesso nas requisições de conferência.
+
+### Verificação da publicação em 28/10/2026
+
+| Verificação | Resultado |
+| --- | --- |
+| Página de login na Vercel | HTTP 200. |
+| Configuração pública da UI | `https://inovapan.onrender.com/api`, recebida por HTTP 200 em `js/config.js`. |
+| `GET /api/health` no Render | HTTP 200, `status: ok`, sistema InovaPan API, versão 2.0.0. |
+| Preflight de login a partir da Vercel | HTTP 204, com `Access-Control-Allow-Origin: https://inovapan.vercel.app`. |
+| `GET /api/clientes` sem token | HTTP 401, mantendo a operação protegida. |
+| Login e abertura do painel no site | Confirmados pela equipe durante a publicação. |
+
+O cadastro, a edição e a conclusão de pedidos e a conferência dos relatórios foram testados localmente. A repetição do fluxo completo no site publicado e suas capturas finais devem ser registradas pela equipe. A permanência dos dados após suspensão, reinício ou nova implantação não está disponível no armazenamento temporário escolhido para o Render Free.
 
 ## Principais endpoints
 
@@ -193,7 +218,7 @@ Os resultados comprovam funcionamento local. Permanecem pendentes os testes nos 
 
 ## Organização das tarefas
 
-A Entrega 04 documentou oito tarefas da API e oito da UI para integrar clientes, produtos, pedidos, painel e relatórios. A Entrega 05 mantém essa base e acrescenta acesso autenticado, edição dos itens, validações e configuração de implantação. As atividades implementadas localmente estão resumidas abaixo.
+A Entrega 04 documentou oito tarefas da API e oito da UI para integrar clientes, produtos, pedidos, painel e relatórios. A Entrega 05 mantém essa base e acrescenta acesso autenticado, edição dos itens, validações e publicação. As implementações estão resumidas abaixo.
 
 | Área | Implementação na API | Implementação na UI |
 | --- | --- | --- |
@@ -206,31 +231,36 @@ A Entrega 04 documentou oito tarefas da API e oito da UI para integrar clientes,
 | Relatórios | Consulta por período e resumo das vendas. | Filtros, listagem e total consolidado. |
 | Validação e consistência | Regras de entrada, transações e preservação dos dados. | Mensagens das operações, validações e tratamento de textos recebidos. |
 
-As tarefas e evidências devem ser acompanhadas no [Trello](https://trello.com/b/zlxtIrdV/inovapan). A equipe ainda deve conferir a correspondência com os cartões reais e registrar as atividades de publicação. Esta revisão não confirma a situação atual dos cartões.
+As tarefas e evidências devem ser acompanhadas no [Trello](https://trello.com/b/zlxtIrdV/inovapan). A equipe deve conferir a correspondência com os cartões reais, registrar a conclusão das atividades implementadas e anexar os links públicos e as capturas. Esta revisão não confirma a situação atual dos cartões.
 
 | Atividade de encerramento | Situação em 28/10/2026 |
 | --- | --- |
 | Implementação e validação local da UI e da API | Confirmadas. |
-| Envio do código da Entrega 05 ao GitHub | Pendente. |
-| Publicação da UI na Vercel e da API no Render | Pendente. |
-| Testes da integração e da persistência nos serviços publicados | Pendentes. |
+| Envio do código da Entrega 05 ao GitHub | Confirmado; referência do código publicado: `afb7d47`. |
+| Publicação da UI na Vercel e da API no Render | Confirmada nos endereços acima. |
+| Comunicação entre UI/API e login no site | CORS verificado; login e abertura do painel confirmados pela equipe. |
+| Fluxo completo de cadastros, pedidos e relatórios no site | Conferência final e capturas a registrar pela equipe. |
+| Persistência contínua no Render Free | Não disponível com o SQLite no armazenamento temporário escolhido. |
 | Conferência dos cartões do Trello e registro das evidências públicas | Pendentes. |
 
-A Entrega 05 estará concluída quando os serviços exigidos estiverem acessíveis e integrados, a persistência estiver confirmada e os documentos e cartões apresentarem os links e as evidências correspondentes.
+Os serviços exigidos estão publicados e o acesso integrado ao painel foi confirmado. Para o encerramento acadêmico, a equipe deve registrar a conferência final dos fluxos no site, atualizar os cartões do Trello e anexar as evidências correspondentes. A limitação do armazenamento gratuito deve acompanhar a apresentação do projeto.
 
 ## Publicação da Entrega 05
 
-Siga [PUBLICACAO.md](PUBLICACAO.md). A configuração prevista é:
+As configurações utilizadas e o procedimento para reproduzir a publicação estão em [PUBLICACAO.md](PUBLICACAO.md).
 
 | Projeto | Plataforma | Configuração |
 | --- | --- | --- |
-| UI | Vercel | Raiz do repositório; `npm run build`; saída `dist`; `INOVAPAN_API_URL` com a URL pública real da API. |
-| API | Render | Raiz `backend`; `npm ci --omit=dev`; `npm start`; saúde em `/api/health`. |
-| Banco | Disco do Render | `DB_PATH=/var/data/inovapan.db` e disco montado em `/var/data`. |
+| UI | Vercel | Framework `Other`; Root Directory vazio; `npm run build`; saída `dist`; `INOVAPAN_API_URL=https://inovapan.onrender.com/api`. |
+| API | Render Free | Raiz `backend`; build `npm_config_build_from_source=true npm ci --omit=dev --foreground-scripts`; início `npm start`; saúde `/api/health`. |
+| Autorização de origem | Ambiente da API | `CORS_ORIGINS=https://inovapan.vercel.app`, sem barra final e sem `/api`. |
+| Banco de demonstração | SQLite no Render Free | `DB_PATH` omitido e sem disco persistente; banco criado automaticamente em `backend/data/inovapan.db`. |
 
-Para preservar SQLite entre reinícios e novas implantações no Render, o arquivo `render.yaml` prevê serviço e disco pagos. A modalidade gratuita sem disco serve a uma demonstração temporária e não preserva esses arquivos após reinícios ou novas implantações. Nenhum serviço foi contratado nesta preparação.
+O SQLite é compilado no ambiente do Render para evitar a incompatibilidade do binário pré-compilado que apresentou `GLIBC_2.38 not found`. A compilação foi concluída no Render e o serviço ficou Live.
 
-Os endereços públicos da UI e da API devem ser inseridos neste README e no relatório depois da publicação. O funcionamento do login, dos cadastros, dos pedidos, dos relatórios e da persistência deve ser confirmado nesses endereços.
+O Render Free pode suspender a API após inatividade, fazendo a primeira requisição demorar enquanto o serviço inicia novamente. Clientes, produtos e pedidos gravados no SQLite temporário são perdidos após suspensão, reinício ou nova implantação. Os registros da instalação local no computador não são transferidos automaticamente para a publicação. Para manter dados de forma contínua, será necessário configurar uma solução persistente; o projeto atual não inclui migração para banco externo.
+
+O arquivo `render.yaml` prevê uma alternativa com serviço e disco pagos e não representa a configuração gratuita publicada. Caso essa alternativa seja utilizada futuramente, a compilação do SQLite também deve ser forçada a partir do código-fonte, e o custo e o caminho do disco devem ser conferidos antes da contratação.
 
 ## Equipe
 
