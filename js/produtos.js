@@ -5,7 +5,7 @@ async function carregarProdutos() {
     const q = pesquisaProduto.value.trim();
     produtosCache = await api(`/produtos${q ? `?q=${encodeURIComponent(q)}` : ''}`);
     contadorProdutos.textContent = `${produtosCache.length} produto(s)`;
-    listaProdutos.innerHTML = produtosCache.map(p => `<tr><td>${p.nome}</td><td>${p.descricao || '-'}</td><td>${moeda(p.preco)}</td><td>${p.ativo ? 'Ativo' : 'Inativo'}</td><td class="text-nowrap"><button class="btn btn-sm btn-outline-primary" onclick="editarProduto(${p.id})">Editar</button> <button class="btn btn-sm btn-outline-danger" onclick="excluirProduto(${p.id})">Excluir</button></td></tr>`).join('') || '<tr><td colspan="5" class="text-center text-muted">Nenhum produto cadastrado.</td></tr>';
+    listaProdutos.innerHTML = produtosCache.map(p => `<tr><td>${esc(p.nome)}</td><td>${esc(p.descricao || '-')}</td><td>${moeda(p.preco)}</td><td>${p.ativo ? 'Ativo' : 'Inativo'}</td><td class="text-nowrap"><button class="btn btn-sm btn-outline-primary" onclick="editarProduto(${p.id})">Editar</button> <button class="btn btn-sm btn-outline-danger" onclick="excluirProduto(${p.id})">Excluir</button></td></tr>`).join('') || '<tr><td colspan="5" class="text-center text-muted">Nenhum produto cadastrado.</td></tr>';
   } catch (e) { alerta('mensagemPagina', e.message, 'danger'); }
 }
 function editarProduto(id) { const p=produtosCache.find(x=>x.id===id); if(!p)return; editandoProduto=id; tituloModalProduto.textContent='Editar produto'; nomeProduto.value=p.nome; descricaoProduto.value=p.descricao||''; precoProduto.value=p.preco; ativoProduto.checked=!!p.ativo; bootstrap.Modal.getOrCreateInstance(modalProduto).show(); }

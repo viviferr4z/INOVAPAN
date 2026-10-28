@@ -7,7 +7,7 @@ async function carregarClientes() {
     clientesCache = await api(`/clientes${q ? `?q=${encodeURIComponent(q)}` : ''}`);
     document.getElementById('contadorClientes').textContent = `${clientesCache.length} cliente(s)`;
     document.getElementById('listaClientes').innerHTML = clientesCache.map(c => `
-      <tr><td>${c.nome}</td><td>${c.telefone}</td><td>${c.email || '-'}</td><td>${c.endereco || '-'}</td>
+      <tr><td>${esc(c.nome)}</td><td>${esc(c.telefone)}</td><td>${esc(c.email || '-')}</td><td>${esc(c.endereco || '-')}</td>
       <td class="text-nowrap"><button class="btn btn-sm btn-outline-primary" onclick="editarCliente(${c.id})">Editar</button>
       <button class="btn btn-sm btn-outline-danger" onclick="excluirCliente(${c.id})">Excluir</button></td></tr>`).join('') || '<tr><td colspan="5" class="text-center text-muted">Nenhum cliente cadastrado.</td></tr>';
   } catch (e) { alerta('mensagemPagina', e.message, 'danger'); }
